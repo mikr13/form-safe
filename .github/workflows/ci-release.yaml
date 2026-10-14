@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and verify only; do not create a tag, release, or store submission
+        type: boolean
+        default: true
+      chrome_action:
+        description: Optional Chrome action after creating the GitHub release
+        type: choice
+        default: none
+        options: [none, dry-run, upload-draft, submit-review]
+      publish_type:
+        description: Stage the approved update, or publish automatically after approval
+        type: choice
+        default: STAGED_PUBLISH
+        options: [STAGED_PUBLISH, DEFAULT_PUBLISH]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: form-safe-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.3'
+      - run: bun install --frozen-lockfile
+      - run: bun run release:prepare
+      - name: Verify release provenance
+        run: |
+          version=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
+          TAG="v$version" node scripts/package-release.mjs --verify
+      - name: Read release version
+        id: version
+        run: |
+          version=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: form-safe-release
+          path: release/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Summarize verified candidate
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          echo "Verified Form Safe $VERSION from $GITHUB_SHA. Preview-only: $DRY_RUN." >> "$GITHUB_STEP_SUMMARY"
+          echo "Chrome, Firefox, sources, extension-build.json, and SHA256SUMS are available in the form-safe-release artifact." >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    needs: build
+    if: inputs.dry_run == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8.0.1
+        with:
+          name: form-safe-release
+          path: release
+      - name: Create release on the verified source commit
+        working-directory: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.build.outputs.tag }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          sha256sum --check SHA256SUMS
+          node -e 'const b=JSON.parse(require("fs").readFileSync("extension-build.json","utf8")); if(b.sourceSha!==process.env.GITHUB_SHA || b.version!==process.env.VERSION) process.exit(1)'
+          tags=$(gh api --paginate "repos/$GH_REPO/tags" --jq '.[].name')
+          if grep -Fxq "$TAG" <<< "$tags"; then
+            echo "Tag $TAG already exists. Choose a new reviewed version; existing releases are never overwritten."
+            exit 1
+          fi
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "Form Safe $VERSION" --generate-notes \
+            "form-safe-$VERSION-chrome.zip" "form-safe-$VERSION-firefox.zip" \
+            "form-safe-$VERSION-sources.zip" extension-build.json SHA256SUMS
+          echo "Published $TAG from $GITHUB_SHA. Firefox is an unsigned development package; GitHub publication does not update Chrome Web Store." >> "$GITHUB_STEP_SUMMARY"
+
+  chrome:
+    needs: [build, publish]
+    if: inputs.chrome_action != 'none'
+    uses: ./.github/workflows/chrome-publish.yml
+    with:
+      tag: ${{ needs.build.outputs.tag }}
+      action: ${{ inputs.chrome_action }}
+      publish_type: ${{ inputs.publish_type }}
+    secrets:
+      CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+      CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}

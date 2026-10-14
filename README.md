@@ -7,6 +7,7 @@
 <p align="center"><strong>A second chance before you leave an unfinished form.</strong></p>
 
 <p align="center">
+  <a href="https://chromewebstore.google.com/detail/form-safe/mhbeeoegononcomocnaekfibmjahmamk"><img alt="Chrome Web Store version" src="https://img.shields.io/chrome-web-store/v/mhbeeoegononcomocnaekfibmjahmamk?label=Chrome%20Web%20Store"></a>
   <a href="https://github.com/mikr13/form-safe/actions/workflows/ci.yml"><img alt="Build status" src="https://github.com/mikr13/form-safe/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Chrome and Firefox builds" src="https://img.shields.io/badge/builds-Chrome%20%7C%20Firefox-2563EB">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white">
@@ -15,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="#install">Install from source</a> ·
+  <a href="https://chromewebstore.google.com/detail/form-safe/mhbeeoegononcomocnaekfibmjahmamk">Install from Chrome Web Store</a> ·
   <a href="docs/DEVELOPMENT.md">Development</a> ·
   <a href="https://github.com/mikr13/form-safe/issues/new?template=bug_report.yml">Report a bug</a>
 </p>
@@ -36,7 +37,15 @@ It runs locally, without an account, analytics, or a server. It does not save or
 
 ## Install
 
-The installation path documented here is a local source build. This repository does not currently provide a published GitHub release or a verified browser-store installation link.
+[![Install from Chrome Web Store](https://img.shields.io/badge/Install_from_Chrome_Web_Store-2563EB?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/form-safe/mhbeeoegononcomocnaekfibmjahmamk)
+
+1. Open the [Form Safe listing](https://chromewebstore.google.com/detail/form-safe/mhbeeoegononcomocnaekfibmjahmamk) in Chrome and choose **Add to Chrome**.
+2. Confirm the installation and reload any pages that were already open.
+3. Edit a standard form field and try the [quick check below](#try-it).
+
+Chrome manages updates to the store-installed extension. Other Chromium browsers that support Chrome Web Store extensions can use the same listing; check behavior in your browser.
+
+### Build from source
 
 You need Git, [Bun](https://bun.sh), and Node.js 22.12 or later for the commands below. These are build tools; the installed extension runs in your browser.
 
@@ -47,7 +56,7 @@ bun install --frozen-lockfile
 bun run build
 ```
 
-### Chrome, Edge, Brave, and other Chromium browsers
+#### Chrome, Edge, Brave, and other Chromium browsers
 
 1. Open your browser's extensions page, such as `chrome://extensions` or `edge://extensions`.
 2. Enable **Developer mode** and choose **Load unpacked**.
@@ -56,7 +65,7 @@ bun run build
 
 Other Chromium browsers can load the Chrome build; check behavior in your specific browser. Keep the build directory in place while the extension is installed.
 
-### Firefox
+#### Firefox
 
 ```sh
 bun run build:firefox
@@ -102,6 +111,7 @@ The script matches HTTP and HTTPS pages so it can watch forms across websites. T
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Privacy Policy](PRIVACY.md)
 - [Release Process](RELEASING.md)
+- [Changelog](CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security Reporting](SECURITY.md)
 

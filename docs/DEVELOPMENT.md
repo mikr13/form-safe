@@ -19,6 +19,10 @@ The install hook runs `wxt prepare`, generating `.wxt/tsconfig.json` and WXT's t
 | `bun run dev` | Start WXT's Chrome development session |
 | `bun run dev:firefox` | Start WXT's Firefox development session |
 | `bun run compile` | Check TypeScript without emitting files |
+| `bun run test` | Test release integrity, store identity, and publishing modes |
+| `bun run changeset` | Record a user-visible change and its version bump |
+| `bun run version` | Apply Changesets to `package.json` and `CHANGELOG.md` |
+| `bun run release:prepare` | Check, test, package, and record release provenance from a clean checkout |
 | `bun run build` | Build Chrome into `.output/chrome-mv3` |
 | `bun run build:firefox` | Build Firefox into `.output/firefox-mv2` |
 | `bun run zip` | Build and package Chrome into a ZIP in `.output` |
@@ -35,6 +39,9 @@ Follow the [README](../README.md#install) for manual installation. Development m
 | [`public/`](../public/) | Icons copied into the extension build |
 | [`package.json`](../package.json) | Metadata, scripts, and development dependencies |
 | [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) | Type checking and Chrome/Firefox packaging |
+| [`.github/workflows/ci-release.yaml`](../.github/workflows/ci-release.yaml) | Preview or publish a verified GitHub release |
+| [`.github/workflows/chrome-publish.yml`](../.github/workflows/chrome-publish.yml) | Authenticate, upload a draft, or submit a tagged release to Chrome Web Store |
+| [`scripts/`](../scripts/) | Archive/provenance verification and Chrome credential normalization |
 
 There is no popup, options page, background script, storage layer, or application server.
 
@@ -42,12 +49,15 @@ There is no popup, options page, background script, storage layer, or applicatio
 
 ```sh
 bun run compile
+bun run test
 bun run zip
 bun run zip:firefox
 git diff --check
 ```
 
-CI runs these build checks and uploads archives for inspection. A successful build does not prove that a real browser displayed a warning. There is currently no automated browser-behavior test suite.
+CI runs these checks and uploads archives for inspection. Release tests reject altered ZIPs, mismatched source commits/versions/store identities, and unexpected permissions; they also check credential normalization and publishing modes. A successful build does not prove that a real browser displayed a warning. There is currently no automated browser-behavior test suite.
+
+WXT derives the extension version from `package.json`. Use Changesets as described in [Release Process](../RELEASING.md); keep the next store version above the version already published. Firefox builds use the stable development ID `form-safe@mikr13.com` and declare no data collection; Firefox store signing and publication are not configured.
 
 For content-script changes, use disposable test data and check each case in Chrome and Firefox:
 

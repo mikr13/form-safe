@@ -1,0 +1,132 @@
+name: Chrome Web Store
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      action:
+        type: string
+        default: dry-run
+      publish_type:
+        type: string
+        default: STAGED_PUBLISH
+    secrets:
+      CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL:
+        required: true
+      CHROME_SERVICE_ACCOUNT_PRIVATE_KEY:
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag; leave empty only for an authentication dry-run
+        required: false
+        type: string
+      action:
+        description: Authenticate only, upload a draft, or submit the release for review
+        type: choice
+        default: dry-run
+        options: [dry-run, upload-draft, submit-review]
+      publish_type:
+        description: Stage the approved update, or publish automatically after approval
+        type: choice
+        default: STAGED_PUBLISH
+        options: [STAGED_PUBLISH, DEFAULT_PUBLISH]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: form-safe-chrome-web-store
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Validate request and required configuration
+        env:
+          TAG: ${{ inputs.tag }}
+          ACTION: ${{ inputs.action }}
+          CHROME_PUBLISH_TYPE: ${{ inputs.publish_type }}
+          CHROME_EXTENSION_ID: ${{ vars.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ vars.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
+        run: |
+          case "$ACTION" in dry-run|upload-draft|submit-review) ;; *) echo "Unknown Chrome action"; exit 1 ;; esac
+          case "$CHROME_PUBLISH_TYPE" in STAGED_PUBLISH|DEFAULT_PUBLISH) ;; *) echo "Unknown publish type"; exit 1 ;; esac
+          if [[ -z "$TAG" ]]; then
+            [[ "$ACTION" == dry-run ]] || { echo "An existing release tag is required for upload or review"; exit 1; }
+          else
+            [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Use a release tag vX.Y.Z"; exit 1; }
+          fi
+          for name in CHROME_EXTENSION_ID CHROME_PUBLISHER_ID CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL CHROME_SERVICE_ACCOUNT_PRIVATE_KEY; do
+            [[ -n "${!name}" ]] || { echo "Missing $name in Form Safe's Actions configuration"; exit 1; }
+          done
+      - name: Checkout trusted publishing tools
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: automation
+          persist-credentials: false
+      - name: Checkout release source for provenance verification
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.tag || github.sha }}
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.3'
+      - run: bun install --frozen-lockfile
+        working-directory: automation
+      - name: Download the published Chrome asset
+        if: inputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh release view "$TAG" --json isDraft --jq '.isDraft' | grep -Fx false
+          gh release download "$TAG" --dir release \
+            --pattern "form-safe-${TAG#v}-chrome.zip" --pattern extension-build.json
+      - name: Verify released ZIP against its tag and source commit
+        if: inputs.tag != ''
+        working-directory: automation
+        env:
+          TAG: ${{ inputs.tag }}
+          SOURCE_DIR: ../source
+          RELEASE_DIR: ../release
+        run: node scripts/package-release.mjs --verify --chrome-only
+      - name: Prepare authentication-only candidate
+        if: inputs.tag == ''
+        working-directory: automation
+        run: bun run release:prepare
+      - name: Submit the verified Chrome ZIP using API v2
+        working-directory: automation
+        env:
+          ACTION: ${{ inputs.action }}
+          TAG: ${{ inputs.tag }}
+          CHROME_API_VERSION: v2
+          CHROME_EXTENSION_ID: ${{ vars.CHROME_EXTENSION_ID }}
+          CHROME_PUBLISHER_ID: ${{ vars.CHROME_PUBLISHER_ID }}
+          CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL: ${{ secrets.CHROME_SERVICE_ACCOUNT_CLIENT_EMAIL }}
+          CHROME_SERVICE_ACCOUNT_PRIVATE_KEY: ${{ secrets.CHROME_SERVICE_ACCOUNT_PRIVATE_KEY }}
+          CHROME_PUBLISH_TYPE: ${{ inputs.publish_type }}
+        run: |
+          if [[ -n "$TAG" ]]; then
+            version="${TAG#v}"
+            export CHROME_ZIP="$PWD/../release/form-safe-$version-chrome.zip"
+          else
+            version=$(node -p "JSON.parse(require('fs').readFileSync('package.json', 'utf8')).version")
+            export CHROME_ZIP="$PWD/release/form-safe-$version-chrome.zip"
+          fi
+          node scripts/submit-chrome.mjs
+          echo "Chrome $ACTION succeeded for ${TAG:-authentication-only candidate}. $CHROME_PUBLISH_TYPE: staged updates require a final dashboard Publish; default updates go live after approval." >> "$GITHUB_STEP_SUMMARY"

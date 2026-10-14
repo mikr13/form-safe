@@ -12,11 +12,17 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "compile": "tsc --noEmit",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "test": "node --test scripts/*.test.mjs",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release:prepare": "bun run compile && bun run test && bun run zip && bun run zip:firefox && node scripts/package-release.mjs"
   },
   "devDependencies": {
+    "@changesets/cli": "3.0.3",
+    "jszip": "3.10.1",
     "typescript": "^5.9.3",
-    "wxt": "^0.20.18"
+    "wxt": "0.21.4"
   },
   "author": "mikr13",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "form-safe",
-  "description": "Prevents accidental tab/window close when filling out forms.",
+  "description": "A browser extension that requests a warning before leaving a page after a form edit.",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -17,5 +17,19 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "wxt": "^0.20.18"
-  }
+  },
+  "author": "mikr13",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikr13/form-safe.git"
+  },
+  "homepage": "https://github.com/mikr13/form-safe#readme",
+  "bugs": {
+    "url": "https://github.com/mikr13/form-safe/issues"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "bun@1.4.3"
 }

@@ -2,8 +2,8 @@ import { defineConfig } from 'wxt';
 
 export default defineConfig({
     manifest: {
-        name: 'form-safe',
-        description: 'Prevents accidental tab/window close when filling out forms.',
+        name: 'Form Safe',
+        description: 'A second chance before you leave an unfinished form. Warns on page unload after a form edit.',
         version: '1.0.0',
         permissions: [],
         icons: {

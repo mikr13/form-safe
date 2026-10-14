@@ -1,0 +1,49 @@
+name: Bug report
+description: Report a missing or unexpected warning, installation issue, or other defect.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: Use fake data. Do not include passwords, private URLs, or real form contents. Report vulnerabilities privately using SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Extension version or commit
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system versions
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation method
+      options:
+        - Chromium unpacked build
+        - Firefox temporary add-on
+        - WXT development session
+        - Other (explain below)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include a minimal HTML example or public test page when possible, and the navigation action you tried.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="title desc">
+  <title id="title">Form Safe — a second chance before you leave an unfinished form</title>
+  <desc id="desc">An illustrated form with a message in progress, surrounded by a protective shield. This is a concept illustration, not a browser screenshot.</desc>
+  <rect width="1280" height="520" rx="24" fill="#fff5eb"/>
+  <path d="M885 0h371a24 24 0 0 1 24 24v472a24 24 0 0 1-24 24H760Z" fill="#ffe3d3"/>
+  <g font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+    <text x="72" y="83" font-size="16" font-weight="700" letter-spacing="3" fill="#a44532">FORM SAFE</text>
+    <text x="68" y="176" font-size="58" font-weight="750" fill="#302923">Still writing?</text>
+    <text x="68" y="248" font-size="58" font-weight="750" fill="#302923">Stay a little longer.</text>
+    <text x="72" y="305" font-size="22" fill="#685b52">A second chance before you leave</text>
+    <text x="72" y="338" font-size="22" fill="#685b52">an unfinished form.</text>
+    <rect x="72" y="392" width="127" height="35" rx="17" fill="#f0ddd0"/>
+    <text x="135" y="415" text-anchor="middle" font-size="14" font-weight="650" fill="#685044">Runs locally</text>
+    <rect x="211" y="392" width="139" height="35" rx="17" fill="#f0ddd0"/>
+    <text x="280" y="415" text-anchor="middle" font-size="14" font-weight="650" fill="#685044">No telemetry</text>
+    <rect x="362" y="392" width="133" height="35" rx="17" fill="#f0ddd0"/>
+    <text x="428" y="415" text-anchor="middle" font-size="14" font-weight="650" fill="#685044">Open source</text>
+    <rect x="791" y="104" width="384" height="310" rx="20" fill="#d87f62" opacity=".13"/>
+    <rect x="779" y="90" width="384" height="310" rx="20" fill="#fffdfa" stroke="#e5bdac" stroke-width="2"/>
+    <path d="M780 134h382" stroke="#eed7cb" stroke-width="2"/>
+    <circle cx="804" cy="113" r="5" fill="#ef947f"/>
+    <circle cx="822" cy="113" r="5" fill="#e6c494"/>
+    <circle cx="840" cy="113" r="5" fill="#97c8ab"/>
+    <text x="809" y="180" font-size="15" font-weight="650" fill="#685044">Your message</text>
+    <rect x="808" y="196" width="295" height="119" rx="9" fill="#fff6ee" stroke="#efcdbb" stroke-width="2"/>
+    <text x="827" y="229" font-size="17" fill="#6e5b4e">Hi, I've been thinking about</text>
+    <text x="827" y="257" font-size="17" fill="#6e5b4e">a small idea that could</text>
+    <text x="827" y="285" font-size="17" fill="#6e5b4e">make this better</text>
+    <path d="M955 269v20" stroke="#cf684b" stroke-width="2"/>
+    <rect x="808" y="338" width="132" height="34" rx="17" fill="#e4f0e7"/>
+    <text x="874" y="360" text-anchor="middle" font-size="13" font-weight="650" fill="#35654b">Edit in progress</text>
+    <path d="M1129 273l67 23v51c0 43-27 71-67 93-40-22-67-50-67-93v-51Z" fill="#f47e63" stroke="#ffb495" stroke-width="6"/>
+    <path d="M1098 348l22 22 42-49" fill="none" stroke="#fff8ed" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1163" y="476" text-anchor="end" font-size="12" letter-spacing="1" fill="#997461">CONCEPT ILLUSTRATION</text>
+  </g>
+</svg>

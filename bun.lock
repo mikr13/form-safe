@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "wxt-starter",
+      "name": "form-safe",
       "devDependencies": {
         "typescript": "^5.9.3",
         "wxt": "^0.20.18",
